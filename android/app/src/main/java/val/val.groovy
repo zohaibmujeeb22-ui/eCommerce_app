@@ -1,0 +1,5 @@
+package val
+
+@interface val {
+
+}

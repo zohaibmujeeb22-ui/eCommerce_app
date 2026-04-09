@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "825065235648",
+    "project_id": "ecommerceapp-9cf4c",
+    "storage_bucket": "ecommerceapp-9cf4c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:825065235648:android:95359080292226074f3925",
+        "android_client_info": {
+          "package_name": "com.zohaib.ecommerce_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "825065235648-dvgsmc0aof50b194fo238p1pjqjrnmsj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zohaib.ecommerce_app",
+            "certificate_hash": "d302985a468aa1154f2ce1a64c9261333707e05a"
+          }
+        },
+        {
+          "client_id": "825065235648-dvrkln6r8mg059nsakn4qukba5o274ir.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApDW-p-WX76GCRm3OmJc2Fl-A1lTiebcA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "825065235648-dvrkln6r8mg059nsakn4qukba5o274ir.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "825065235648-4b4ta3l66d7vpvchbp8sjh3jqqkaulpm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.ecommerceApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
