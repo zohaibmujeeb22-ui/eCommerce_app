@@ -3,8 +3,6 @@ import 'package:ecommerce_app/Screens/product_detail_screen.dart';
 import 'package:ecommerce_app/models/product.dart';
 import 'package:ecommerce_app/services/api_service.dart';
 import 'package:ecommerce_app/services/app_state.dart';
-import 'package:ecommerce_app/Screens/profile_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -291,7 +289,7 @@ class ProductSearchDelegate extends SearchDelegate<String> {
             Text(
               '\$${product.price}',
               style: const TextStyle(
-                color: Colors.deepOrange,
+                color: Color.fromARGB(255, 249, 109, 67),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -533,9 +531,7 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
 
-    if (result != null && result.isNotEmpty) {
-      // Handle search result if needed
-    }
+    if (result != null && result.isNotEmpty) {}
   }
 
   void _navigateToCategory(String category) {
@@ -636,89 +632,6 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-  Widget _buildUserProfileHeader() {
-    final user = FirebaseAuth.instance.currentUser;
-    final userName =
-        user?.displayName ?? user?.email?.split('@').first ?? 'Guest';
-    final userEmail = user?.email ?? 'Not logged in';
-    final photoUrl = user?.photoURL;
-
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const ProfileScreen()),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.deepOrange.withAlpha(26),
-              Colors.deepOrange.withAlpha(10),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.deepOrange.withAlpha(51), width: 1),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.deepOrange, width: 2),
-                image: photoUrl != null
-                    ? DecorationImage(
-                        image: NetworkImage(photoUrl),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-              child: photoUrl == null
-                  ? const Icon(Icons.person, color: Colors.deepOrange, size: 28)
-                  : null,
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    userName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: Colors.black87,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    userEmail,
-                    style: const TextStyle(fontSize: 12, color: Colors.black54),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: Colors.deepOrange,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -739,10 +652,9 @@ class _HomeScreenState extends State<HomeScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildUserProfileHeader(),
                     const SizedBox(height: 24),
                     Text(
-                      'Welcome Back!',
+                      'Premium Products!',
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
