@@ -6,6 +6,396 @@ import 'package:ecommerce_app/services/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+class ProductSearchDelegate extends SearchDelegate<String> {
+  final List<Product> products;
+  final List<String> categories;
+  final Function(String) onCategorySelected;
+  final Function(Product) onProductSelected;
+
+  ProductSearchDelegate({
+    required this.products,
+    required this.categories,
+    required this.onCategorySelected,
+    required this.onProductSelected,
+  });
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      if (query.isNotEmpty)
+        IconButton(
+          icon: const Icon(Icons.clear),
+          onPressed: () {
+            query = '';
+            showSuggestions(context);
+          },
+        ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, '');
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    final results = _getSearchResults();
+
+    return Container(
+      color: Colors.grey[50],
+      child: results.isEmpty
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.search_off, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    'No results found',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              itemCount: results.length,
+              itemBuilder: (context, index) {
+                final result = results[index];
+                return result is Product
+                    ? _buildProductResult(context, result)
+                    : _buildCategoryResult(context, result as String);
+              },
+            ),
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    final suggestions = _getSuggestions();
+
+    return Container(
+      color: Colors.grey[50],
+      child: ListView(
+        children: [
+          if (query.isEmpty) ...[
+            _buildSuggestionHeader('Popular Categories'),
+            ...categories
+                .take(6)
+                .map((category) => _buildCategorySuggestion(context, category)),
+            const SizedBox(height: 20),
+            _buildSuggestionHeader('Recent Searches'),
+            _buildRecentSearchItem(context, 'beauty'),
+            _buildRecentSearchItem(context, 'electronics'),
+            _buildRecentSearchItem(context, 'fashion'),
+          ] else ...[
+            ...suggestions.map((suggestion) {
+              return suggestion is Product
+                  ? _buildProductSuggestion(context, suggestion)
+                  : _buildCategorySuggestion(context, suggestion as String);
+            }),
+          ],
+        ],
+      ),
+    );
+  }
+
+  List<dynamic> _getSuggestions() {
+    if (query.isEmpty) return [];
+
+    final queryLower = query.toLowerCase();
+    final categorySuggestions = categories
+        .where((cat) => categoryLabel(cat).toLowerCase().contains(queryLower))
+        .toList();
+
+    final productSuggestions = products
+        .where((product) => product.title.toLowerCase().contains(queryLower))
+        .take(5)
+        .toList();
+
+    return [...categorySuggestions, ...productSuggestions];
+  }
+
+  List<dynamic> _getSearchResults() {
+    if (query.isEmpty) return [];
+
+    final queryLower = query.toLowerCase();
+    final categoryResults = categories
+        .where((cat) => categoryLabel(cat).toLowerCase().contains(queryLower))
+        .toList();
+
+    final productResults = products
+        .where((product) => product.title.toLowerCase().contains(queryLower))
+        .toList();
+
+    return [...categoryResults, ...productResults];
+  }
+
+  Widget _buildSuggestionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: Colors.black54,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategorySuggestion(BuildContext context, String category) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: _getCategoryColor(category).withAlpha(26),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          _getCategoryIcon(category),
+          color: _getCategoryColor(category),
+        ),
+      ),
+      title: Text(
+        categoryLabel(category),
+        style: const TextStyle(fontWeight: FontWeight.w600),
+      ),
+      subtitle: const Text('Browse category'),
+      onTap: () {
+        query = categoryLabel(category);
+        onCategorySelected(category);
+        close(context, category);
+      },
+    );
+  }
+
+  Widget _buildProductSuggestion(BuildContext context, Product product) {
+    return ListTile(
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          product.image,
+          width: 40,
+          height: 40,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              const Icon(Icons.broken_image, size: 40),
+        ),
+      ),
+      title: Text(product.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: Text('\$${product.price}'),
+      onTap: () {
+        query = product.title;
+        onProductSelected(product);
+        close(context, product.title);
+      },
+    );
+  }
+
+  Widget _buildRecentSearchItem(BuildContext context, String searchTerm) {
+    return ListTile(
+      leading: const Icon(Icons.history, color: Colors.grey),
+      title: Text(searchTerm),
+      onTap: () {
+        query = searchTerm;
+        showResults(context);
+      },
+    );
+  }
+
+  Widget _buildCategoryResult(BuildContext context, String category) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(10),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: _getCategoryColor(category).withAlpha(26),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            _getCategoryIcon(category),
+            color: _getCategoryColor(category),
+            size: 24,
+          ),
+        ),
+        title: Text(
+          categoryLabel(category),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        subtitle: Text('${_getCategoryProductCount(category)} products'),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {
+          onCategorySelected(category);
+          close(context, category);
+        },
+      ),
+    );
+  }
+
+  Widget _buildProductResult(BuildContext context, Product product) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(10),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            product.image,
+            width: 50,
+            height: 50,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.broken_image, size: 50),
+          ),
+        ),
+        title: Text(
+          product.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '\$${product.price}',
+              style: const TextStyle(
+                color: Colors.deepOrange,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              categoryLabel(product.category),
+              style: const TextStyle(fontSize: 12),
+            ),
+          ],
+        ),
+        onTap: () {
+          onProductSelected(product);
+          close(context, product.title);
+        },
+      ),
+    );
+  }
+
+  int _getCategoryProductCount(String category) {
+    return products.where((p) => p.category == category).length;
+  }
+
+  IconData _getCategoryIcon(String categoryName) {
+    switch (categoryName.toLowerCase()) {
+      case 'electronics':
+      case 'smartphones':
+      case 'mobile-accessories':
+        return Icons.smartphone_rounded;
+      case 'laptops':
+      case 'tablets':
+        return Icons.laptop_rounded;
+      case 'womens-jewellery':
+      case 'jewelery':
+        return Icons.diamond_rounded;
+      case 'beauty':
+      case 'skin-care':
+      case 'fragrances':
+        return Icons.spa_rounded;
+      case 'furniture':
+      case 'home-decoration':
+        return Icons.chair_rounded;
+      case 'groceries':
+      case 'kitchen-accessories':
+        return Icons.local_grocery_store;
+      case 'mens-shirts':
+      case 'mens-shoes':
+      case 'mens-watches':
+      case 'tops':
+      case 'womens-dresses':
+      case 'womens-bags':
+      case 'womens-shoes':
+      case 'womens-watches':
+        return Icons.checkroom_rounded;
+      case 'motorcycle':
+      case 'vehicle':
+        return Icons.motorcycle;
+      case 'sports-accessories':
+      case 'sunglasses':
+        return Icons.sports_handball_rounded;
+      default:
+        return Icons.category;
+    }
+  }
+
+  Color _getCategoryColor(String categoryName) {
+    switch (categoryName.toLowerCase()) {
+      case 'electronics':
+      case 'smartphones':
+      case 'mobile-accessories':
+        return const Color(0xFF2196F3);
+      case 'laptops':
+      case 'tablets':
+        return const Color(0xFF3F51B5);
+      case 'beauty':
+      case 'skin-care':
+      case 'fragrances':
+        return const Color(0xFFE91E63);
+      case 'womens-jewellery':
+      case 'jewelery':
+        return const Color(0xFFFF9800);
+      case 'furniture':
+      case 'home-decoration':
+        return const Color(0xFF795548);
+      case 'groceries':
+      case 'kitchen-accessories':
+        return const Color(0xFF4CAF50);
+      case 'mens-shirts':
+      case 'mens-shoes':
+      case 'mens-watches':
+      case 'tops':
+      case 'womens-dresses':
+      case 'womens-bags':
+      case 'womens-shoes':
+      case 'womens-watches':
+        return const Color(0xFF9C27B0);
+      case 'motorcycle':
+      case 'vehicle':
+        return const Color(0xFF607D8B);
+      case 'sports-accessories':
+      case 'sunglasses':
+        return const Color(0xFF00BCD4);
+      default:
+        return const Color(0xFF3F51B5);
+    }
+  }
+}
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -18,14 +408,12 @@ class _HomeScreenState extends State<HomeScreen>
   final ApiService apiService = ApiService();
 
   List<Product> products = [];
-  List<Product> filteredProducts = [];
   List<String> categories = [];
 
   bool isLoading = true;
   bool isCategoryLoading = true;
   String? errorMessage;
 
-  final TextEditingController searchController = TextEditingController();
   final PageController _pageController = PageController();
   int currentPage = 0;
 
@@ -46,7 +434,6 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   void dispose() {
-    searchController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -69,7 +456,6 @@ class _HomeScreenState extends State<HomeScreen>
       if (mounted) {
         setState(() {
           products = [];
-          filteredProducts = [];
           errorMessage =
               'Unable to load products. Please check your connection and retry.';
         });
@@ -91,7 +477,6 @@ class _HomeScreenState extends State<HomeScreen>
       if (mounted) {
         setState(() {
           products = data;
-          filteredProducts = data;
         });
       }
     } catch (e) {
@@ -115,12 +500,34 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-  void searchProducts(String query) {
-    setState(() {
-      filteredProducts = products
-          .where((p) => p.title.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    });
+  void _onSearchPressed() async {
+    final result = await showSearch(
+      context: context,
+      delegate: ProductSearchDelegate(
+        products: products,
+        categories: categories,
+        onCategorySelected: _navigateToCategory,
+        onProductSelected: _navigateToProduct,
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      // Handle search result if needed
+    }
+  }
+
+  void _navigateToCategory(String category) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => CategoriesScreen(category: category)),
+    );
+  }
+
+  void _navigateToProduct(Product product) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
+    );
   }
 
   IconData getCategoryIcon(String categoryName) {
@@ -211,7 +618,7 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     super.build(context);
     final theme = Theme.of(context);
-    final hasProducts = filteredProducts.isNotEmpty;
+    final hasProducts = products.isNotEmpty;
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -253,36 +660,45 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         ],
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 16,
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.search, color: Colors.black54),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextField(
-                              controller: searchController,
-                              onChanged: searchProducts,
-                              decoration: const InputDecoration(
-                                hintText: 'Search the collection',
-                                border: InputBorder.none,
-                              ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: _onSearchPressed,
+                          borderRadius: BorderRadius.circular(25),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 16,
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.search, color: Colors.black54),
+                                const SizedBox(width: 12),
+                                const Expanded(
+                                  child: Text(
+                                    'Search products, categories...',
+                                    style: TextStyle(
+                                      color: Colors.black54,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.deepOrange.withAlpha(26),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    Icons.arrow_forward,
+                                    color: Colors.deepOrange,
+                                    size: 16,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          if (searchController.text.isNotEmpty)
-                            GestureDetector(
-                              onTap: () {
-                                searchController.clear();
-                                searchProducts('');
-                              },
-                              child: const Icon(
-                                Icons.close,
-                                color: Colors.black54,
-                              ),
-                            ),
-                        ],
+                        ),
                       ),
                     ),
                   ],
@@ -511,7 +927,7 @@ class _HomeScreenState extends State<HomeScreen>
                     childAspectRatio: 0.6,
                   ),
                   delegate: SliverChildBuilderDelegate((context, index) {
-                    final product = filteredProducts[index];
+                    final product = products[index];
                     return GestureDetector(
                       onTap: () => Navigator.push(
                         context,
@@ -645,7 +1061,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ),
                     );
-                  }, childCount: filteredProducts.length),
+                  }, childCount: products.length),
                 ),
               ),
             const SliverToBoxAdapter(child: SizedBox(height: 28)),
