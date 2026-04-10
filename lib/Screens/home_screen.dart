@@ -476,7 +476,21 @@ class _HomeScreenState extends State<HomeScreen>
       final data = await apiService.fetchProducts();
       if (mounted) {
         setState(() {
-          bannerProducts = data.take(5).toList();
+          final techProducts = data.where((p) {
+            final category = p.category.toLowerCase();
+            final title = p.title.toLowerCase();
+            return category == 'electronics' ||
+                title.contains('watch') ||
+                title.contains('mobile') ||
+                title.contains('laptop');
+          }).toList();
+
+          if (techProducts.isNotEmpty) {
+            bannerProducts = techProducts.take(5).toList();
+          } else {
+            bannerProducts = data.take(5).toList();
+          }
+
           isLoadingBannerProducts = false;
         });
       }
@@ -743,129 +757,206 @@ class _HomeScreenState extends State<HomeScreen>
                       final product = bannerProducts[index];
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(30),
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Hero(
-                                tag: 'banner_${product.id}',
-                                child: Image.network(
-                                  product.image,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Container(
-                                        color: Colors.grey[300],
-                                        child: const Icon(
-                                          Icons.image_not_supported,
-                                        ),
-                                      ),
-                                ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.12),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
                               ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.bottomCenter,
-                                    end: Alignment.topCenter,
-                                    colors: [
-                                      const Color.fromRGBO(0, 0, 0, 0.6),
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                left: 20,
-                                bottom: 20,
-                                right: 20,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      product.title,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(30),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                // 1. IMAGE WITH WHITE BACKGROUND
+                                Container(
+                                  color: Colors.white,
+                                  child: Hero(
+                                    tag: 'banner_${product.id}',
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 40.0,
+                                      ), // Room for text
+                                      child: Image.network(
+                                        product.image,
+                                        fit: BoxFit
+                                            .contain, // Best for electronics
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                Container(
+                                                  color: Colors.grey[100],
+                                                  child: const Icon(
+                                                    Icons.image_not_supported,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                  ),
+                                ),
+                                // 2. PREMIUM DARK GRADIENT OVERLAY
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.bottomCenter,
+                                      end: Alignment.topCenter,
+                                      stops: [0.0, 0.6],
+                                      colors: [
+                                        Color.fromRGBO(0, 0, 0, 0.85),
+                                        Colors.transparent,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                // 3. AGENCY BADGE (TOP LEFT)
+                                Positioned(
+                                  top: 20,
+                                  left: 20,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black87,
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(color: Colors.white24),
+                                    ),
+                                    child: const Row(
                                       children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const Text(
-                                              'Just in',
-                                              style: TextStyle(
-                                                color: Colors.white70,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                            Text(
-                                              '\$${product.price}',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
+                                        Icon(
+                                          Icons.bolt,
+                                          color: Colors.deepOrange,
+                                          size: 16,
                                         ),
-                                        ElevatedButton.icon(
-                                          onPressed: () {
-                                            context.read<AppState>().addToCart(
-                                              product,
-                                              1,
-                                            );
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  '${product.title.length > 20 ? "${product.title.substring(0, 20)}..." : product.title} added to cart',
-                                                ),
-                                                backgroundColor: Colors.green,
-                                              ),
-                                            );
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) =>
-                                                    ProductDetailScreen(
-                                                      product: product,
-                                                    ),
-                                              ),
-                                            );
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.deepOrange,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 10,
-                                            ),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          "PREMIUM TECH",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 1.2,
                                           ),
-                                          icon: const Icon(
-                                            Icons.shopping_cart,
-                                            size: 16,
-                                          ),
-                                          label: const Text('Buy Now'),
                                         ),
                                       ],
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                                Positioned(
+                                  left: 20,
+                                  bottom: 20,
+                                  right: 20,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        product.title,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: -0.5,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Exclusive Drop',
+                                                style: TextStyle(
+                                                  color: Colors.white
+                                                      .withOpacity(0.7),
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              Text(
+                                                '\$${product.price}',
+                                                style: const TextStyle(
+                                                  color: Colors.deepOrange,
+                                                  fontSize: 24,
+                                                  fontWeight: FontWeight.w900,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          ElevatedButton.icon(
+                                            onPressed: () {
+                                              context
+                                                  .read<AppState>()
+                                                  .addToCart(product, 1);
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    '${product.title.length > 20 ? "${product.title.substring(0, 20)}..." : product.title} added to cart',
+                                                  ),
+                                                  backgroundColor: const Color(
+                                                    0xFF1A1A1A,
+                                                  ),
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                ),
+                                              );
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      ProductDetailScreen(
+                                                        product: product,
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.white,
+                                              foregroundColor: Colors.black,
+                                              elevation: 0,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 16,
+                                                    vertical: 12,
+                                                  ),
+                                            ),
+                                            icon: const Icon(
+                                              Icons.shopping_bag_outlined,
+                                              size: 18,
+                                            ),
+                                            label: const Text(
+                                              'Buy Now',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );
