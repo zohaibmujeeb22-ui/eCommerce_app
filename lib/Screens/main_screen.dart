@@ -18,6 +18,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String userName = "Guest";
+  String? userProfilePicUrl;
 
   @override
   void initState() {
@@ -25,11 +26,21 @@ class _MainScreenState extends State<MainScreen> {
     _loadUserName();
   }
 
+  String formatUserEmail(String email) {
+    if (email.isEmpty) return "Guest";
+    if (!email.contains('@')) return email;
+    String prefix = email.split('@')[0];
+    return prefix.length > 12 ? '${prefix.substring(0, 12)}...' : prefix;
+  }
+
   Future<void> _loadUserName() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     setState(() {
-      userName = prefs.getString('user_name') ?? "Guest";
+      userName =
+          prefs.getString('user_name') ??
+          prefs.getString('user_email') ??
+          "Guest";
     });
   }
 
@@ -49,7 +60,7 @@ class _MainScreenState extends State<MainScreen> {
 
     return Scaffold(
       key: _scaffoldKey,
-      extendBody: false,
+      extendBody: true,
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.grey[100],
       endDrawer: Drawer(
@@ -100,8 +111,18 @@ class _MainScreenState extends State<MainScreen> {
             CircleAvatar(
               radius: 22,
               backgroundColor: Colors.black12,
-              backgroundImage: NetworkImage(
-                'https://ui-avatars.com/api/?name=$userName&background=FF5722&color=fff',
+              child: ClipOval(
+                child: Image.network(
+                  userProfilePicUrl ?? "",
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(
+                      Icons.person,
+                      color: Colors.black45,
+                      size: 24,
+                    );
+                  },
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -111,7 +132,7 @@ class _MainScreenState extends State<MainScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Hello, $userName",
+                    "Hello, ${formatUserEmail(userName)}",
                     style: const TextStyle(
                       color: Color(0xFF1A1A1A),
                       fontSize: 18,
@@ -201,57 +222,49 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       body: IndexedStack(index: currentIndex, children: _tabs),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(20),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: NavigationBar(
-            height: 70,
-            backgroundColor: Colors.transparent,
-            indicatorColor: Colors.deepOrange.withAlpha(46),
-            labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-            selectedIndex: currentIndex,
-            onDestinationSelected: (index) {
-              setState(() => currentIndex = index);
-            },
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home),
-                label: 'Home',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.category_outlined),
-                selectedIcon: Icon(Icons.category),
-                label: 'Categories',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.shopping_cart_outlined),
-                selectedIcon: Icon(Icons.shopping_cart),
-                label: 'Cart',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.favorite_border),
-                selectedIcon: Icon(Icons.favorite),
-                label: 'Favorites',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person),
-                label: 'Profile',
-              ),
-            ],
-          ),
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 25),
+        height: 75,
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1A1A),
+          borderRadius: BorderRadius.circular(35),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildNavItem(Icons.home_filled, Icons.home_outlined, 0),
+            _buildNavItem(Icons.grid_view_rounded, Icons.grid_view_outlined, 1),
+            _buildNavItem(Icons.shopping_bag, Icons.shopping_bag_outlined, 2),
+            _buildNavItem(Icons.favorite, Icons.favorite_outline, 3),
+            _buildNavItem(Icons.person, Icons.person_outline, 4),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData activeIcon, IconData inactiveIcon, int index) {
+    bool isSelected = currentIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => currentIndex = index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.deepOrange : Colors.transparent,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          isSelected ? activeIcon : inactiveIcon,
+          color: isSelected ? Colors.white : Colors.white60,
+          size: 26,
         ),
       ),
     );

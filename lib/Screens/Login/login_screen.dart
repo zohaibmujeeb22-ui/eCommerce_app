@@ -32,7 +32,6 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text.trim(),
       );
 
-      // SUCCESS NAVIGATION
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
@@ -174,7 +173,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           if (!mounted || credential == null) return;
 
-                          // STRICT GATE: Rejects new users on the Login screen
                           if (credential.additionalUserInfo?.isNewUser ==
                               true) {
                             await AuthService().signOut();
