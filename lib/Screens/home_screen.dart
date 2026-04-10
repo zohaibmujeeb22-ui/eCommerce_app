@@ -3,6 +3,8 @@ import 'package:ecommerce_app/Screens/product_detail_screen.dart';
 import 'package:ecommerce_app/models/product.dart';
 import 'package:ecommerce_app/services/api_service.dart';
 import 'package:ecommerce_app/services/app_state.dart';
+import 'package:ecommerce_app/Screens/profile_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -412,16 +414,13 @@ class _HomeScreenState extends State<HomeScreen>
 
   bool isLoading = true;
   bool isCategoryLoading = true;
+  bool isLoadingBannerProducts = true;
   String? errorMessage;
+
+  List<Product> bannerProducts = [];
 
   final PageController _pageController = PageController();
   int currentPage = 0;
-
-  final List<String> bannerImages = [
-    'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=1200',
-    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200',
-    'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=1200',
-  ];
 
   @override
   bool get wantKeepAlive => true;
@@ -443,11 +442,13 @@ class _HomeScreenState extends State<HomeScreen>
       setState(() {
         isLoading = true;
         isCategoryLoading = true;
+        isLoadingBannerProducts = true;
         errorMessage = null;
       });
     }
 
     final categoriesFuture = loadCategories();
+    final bannerFuture = _loadBannerProducts();
 
     try {
       await loadProducts();
@@ -469,6 +470,27 @@ class _HomeScreenState extends State<HomeScreen>
     }
 
     await categoriesFuture;
+    await bannerFuture;
+  }
+
+  Future<void> _loadBannerProducts() async {
+    try {
+      final data = await apiService.fetchProducts();
+      if (mounted) {
+        setState(() {
+          bannerProducts = data.take(5).toList();
+          isLoadingBannerProducts = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Banner Products API Error: $e');
+      if (mounted) {
+        setState(() {
+          isLoadingBannerProducts = false;
+          bannerProducts = [];
+        });
+      }
+    }
   }
 
   Future<void> loadProducts() async {
@@ -614,6 +636,89 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
+  Widget _buildUserProfileHeader() {
+    final user = FirebaseAuth.instance.currentUser;
+    final userName =
+        user?.displayName ?? user?.email?.split('@').first ?? 'Guest';
+    final userEmail = user?.email ?? 'Not logged in';
+    final photoUrl = user?.photoURL;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.deepOrange.withAlpha(26),
+              Colors.deepOrange.withAlpha(10),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.deepOrange.withAlpha(51), width: 1),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.deepOrange, width: 2),
+                image: photoUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(photoUrl),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: photoUrl == null
+                  ? const Icon(Icons.person, color: Colors.deepOrange, size: 28)
+                  : null,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    userName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    userEmail,
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Colors.deepOrange,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -634,15 +739,17 @@ class _HomeScreenState extends State<HomeScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    _buildUserProfileHeader(),
+                    const SizedBox(height: 24),
                     Text(
-                      'Shop the Best',
+                      'Welcome Back!',
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Browse over 100 real products from top categories.',
+                      'Discover amazing deals on premium products',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.black54,
                       ),
@@ -705,89 +812,178 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: 220,
-                child: PageView.builder(
-                  controller: _pageController,
-                  itemCount: bannerImages.length,
-                  onPageChanged: (i) => setState(() => currentPage = i),
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Image.network(
-                              bannerImages[index],
-                              fit: BoxFit.cover,
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.bottomCenter,
-                                  end: Alignment.topCenter,
-                                  colors: [
-                                    const Color.fromRGBO(0, 0, 0, 0.5),
-                                    Colors.transparent,
+            if (isLoadingBannerProducts)
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 220,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              )
+            else if (bannerProducts.isNotEmpty)
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 220,
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: bannerProducts.length,
+                    onPageChanged: (i) => setState(() => currentPage = i),
+                    itemBuilder: (context, index) {
+                      final product = bannerProducts[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Hero(
+                                tag: 'banner_${product.id}',
+                                child: Image.network(
+                                  product.image,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                        color: Colors.grey[300],
+                                        child: const Icon(
+                                          Icons.image_not_supported,
+                                        ),
+                                      ),
+                                ),
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.bottomCenter,
+                                    end: Alignment.topCenter,
+                                    colors: [
+                                      const Color.fromRGBO(0, 0, 0, 0.6),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                left: 20,
+                                bottom: 20,
+                                right: 20,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      product.title,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'Just in',
+                                              style: TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                            Text(
+                                              '\$${product.price}',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            context.read<AppState>().addToCart(
+                                              product,
+                                              1,
+                                            );
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  '${product.title.length > 20 ? "${product.title.substring(0, 20)}..." : product.title} added to cart',
+                                                ),
+                                                backgroundColor: Colors.green,
+                                              ),
+                                            );
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    ProductDetailScreen(
+                                                      product: product,
+                                                    ),
+                                              ),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.deepOrange,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 10,
+                                            ),
+                                          ),
+                                          icon: const Icon(
+                                            Icons.shopping_cart,
+                                            size: 16,
+                                          ),
+                                          label: const Text('Buy Now'),
+                                        ),
+                                      ],
+                                    ),
                                   ],
                                 ),
                               ),
-                            ),
-                            Positioned(
-                              left: 20,
-                              bottom: 20,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
-                                  Text(
-                                    'Best Sellers',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(height: 6),
-                                  Text(
-                                    'New arrivals for your wardrobe',
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(bannerImages.length, (index) {
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      height: 8,
-                      width: currentPage == index ? 28 : 8,
-                      decoration: BoxDecoration(
-                        color: currentPage == index
-                            ? Colors.deepOrange
-                            : Colors.black12,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    );
-                  }),
+            if (bannerProducts.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(bannerProducts.length, (index) {
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        height: 8,
+                        width: currentPage == index ? 28 : 8,
+                        decoration: BoxDecoration(
+                          color: currentPage == index
+                              ? Colors.deepOrange
+                              : Colors.black12,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      );
+                    }),
+                  ),
                 ),
               ),
-            ),
             const SliverPadding(
               padding: EdgeInsets.only(top: 28, left: 16, right: 16),
               sliver: SliverToBoxAdapter(
