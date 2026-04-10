@@ -93,7 +93,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.deepOrange.withOpacity(0.1),
+                    color: Colors.deepOrange.withAlpha(26),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -204,14 +204,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           // before authState fires so AuthWrapper does not jump to MainScreen.
                           final UserCredential? result = await AuthService()
                               .signInWithGoogle(
-                            skipLightweightAuthentication: true,
-                            onBeforeFirebaseSignIn: () {
-                              if (!context.mounted) return;
-                              context
-                                  .read<AuthController>()
-                                  .markNeedsGoogleProfileSetup();
-                            },
-                          );
+                                skipLightweightAuthentication: true,
+                                onBeforeFirebaseSignIn: () {
+                                  if (!context.mounted) return;
+                                  context
+                                      .read<AuthController>()
+                                      .markNeedsGoogleProfileSetup();
+                                },
+                              );
 
                           if (!context.mounted) return;
                           if (result == null) {

@@ -63,8 +63,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '825065235648',
     projectId: 'ecommerceapp-9cf4c',
     storageBucket: 'ecommerceapp-9cf4c.firebasestorage.app',
-    androidClientId: '825065235648-dvgsmc0aof50b194fo238p1pjqjrnmsj.apps.googleusercontent.com',
-    iosClientId: '825065235648-4b4ta3l66d7vpvchbp8sjh3jqqkaulpm.apps.googleusercontent.com',
+    androidClientId:
+        '825065235648-dvgsmc0aof50b194fo238p1pjqjrnmsj.apps.googleusercontent.com',
+    iosClientId:
+        '825065235648-4b4ta3l66d7vpvchbp8sjh3jqqkaulpm.apps.googleusercontent.com',
     iosBundleId: 'com.example.ecommerceApp',
   );
 }

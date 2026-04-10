@@ -68,7 +68,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           stops: const [0.5, 0.9],
                           colors: [
                             Colors.transparent,
-                            Colors.black.withOpacity(0.8),
+                            Colors.black.withAlpha(204),
                           ],
                         ),
                       ),
@@ -176,7 +176,7 @@ class DotIndicator extends StatelessWidget {
       height: 8,
       width: isActive ? 24 : 8,
       decoration: BoxDecoration(
-        color: isActive ? Colors.deepOrange : Colors.white.withOpacity(0.4),
+        color: isActive ? Colors.deepOrange : Colors.white.withAlpha(102),
         borderRadius: const BorderRadius.all(Radius.circular(12)),
       ),
     );
