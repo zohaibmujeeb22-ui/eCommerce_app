@@ -197,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           if (mounted) setState(() => _isGoogleLoading = false);
                         }
                       },
-                      icon: Image.asset('assets/images/google.png', height: 24),
+                      icon: Image.asset('assets/images/google.png', height: 55),
                       label: const Text(
                         "Continue with Google",
                         style: TextStyle(
