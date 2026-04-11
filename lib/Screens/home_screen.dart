@@ -661,7 +661,7 @@ class _HomeScreenState extends State<HomeScreen>
           primary: true,
           slivers: [
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
               sliver: SliverToBoxAdapter(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
