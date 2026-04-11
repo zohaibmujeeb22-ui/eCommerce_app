@@ -1,4 +1,4 @@
-import 'package:ecommerce_app/Screens/onboarding_screen.dart';
+import 'package:ecommerce_app/Screens/flash_screen.dart';
 import 'package:ecommerce_app/root_scaffold_messenger_key.dart';
 import 'package:ecommerce_app/services/app_state.dart';
 import 'package:ecommerce_app/services/auth_controller.dart';
@@ -102,7 +102,7 @@ class AuthWrapper extends StatelessWidget {
               context.read<AuthController>().clearNeedsGoogleProfileSetup();
             }
           });
-          return const OnboardingScreen();
+          return const FlashScreen();
         }
 
         return const MainScreen();
