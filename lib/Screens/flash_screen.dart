@@ -6,52 +6,55 @@ class FlashScreen extends StatefulWidget {
   const FlashScreen({super.key});
 
   @override
-  _FlashScreenState createState() => _FlashScreenState();
+  State<FlashScreen> createState() => _FlashScreenState();
 }
 
-class _FlashScreenState extends State<FlashScreen>
-    with SingleTickerProviderStateMixin {
+class _FlashScreenState extends State<FlashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<Offset> _logoAnimation;
-  late Animation<Offset> _textAnimation;
+  late Animation<double> _entranceFade;
+  late Animation<Offset> _logoSlide;
+  late Animation<Offset> _textSlide;
 
-  double _opacity = 1.0;
-  double _scale = 1.0;
+  double _dustOpacity = 1.0;
+  double _dustScale = 1.0;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1800),
     );
 
-    _logoAnimation = Tween<Offset>(
-      begin: const Offset(-1.5, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
+    _entranceFade = CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.6, curve: Curves.easeIn));
 
-    _textAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 3.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _logoSlide = Tween<Offset>(begin: const Offset(-0.5, 0.0), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart));
+
+    _textSlide = Tween<Offset>(begin: const Offset(0.0, 0.5), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart));
 
     _controller.forward();
 
     Timer(const Duration(seconds: 3), () {
       if (mounted) {
         setState(() {
-          _opacity = 0.0;
-          _scale = 3.0;
+          _dustOpacity = 0.0;
+          _dustScale = 4.0; 
         });
       }
     });
 
     Timer(const Duration(seconds: 4), () {
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => OnboardingScreen()),
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            transitionDuration: const Duration(milliseconds: 800),
+            pageBuilder: (context, animation, secondaryAnimation) => OnboardingScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          ),
         );
       }
     });
@@ -66,38 +69,57 @@ class _FlashScreenState extends State<FlashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF0A0A0A), 
       body: Center(
-        child: AnimatedOpacity(
-          opacity: _opacity,
-          duration: const Duration(milliseconds: 800),
-          child: AnimatedScale(
-            scale: _scale,
-            duration: const Duration(milliseconds: 900),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SlideTransition(
-                  position: _logoAnimation,
-                  child: const Icon(
-                    Icons.shopping_bag,
-                    size: 100,
-                    color: Colors.blueAccent,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SlideTransition(
-                  position: _textAnimation,
-                  child: const Text(
-                    "SHOP PRO",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 5,
+        child: AnimatedScale(
+          scale: _dustScale,
+          duration: const Duration(milliseconds: 1500),
+          curve: Curves.easeOutExpo,
+          child: AnimatedOpacity(
+            opacity: _dustOpacity,
+            duration: const Duration(milliseconds: 1000),
+            child: FadeTransition(
+              opacity: _entranceFade,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SlideTransition(
+                    position: _logoSlide,
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white24, width: 1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 50),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 40),
+                  SlideTransition(
+                    position: _textSlide,
+                    child: Column(
+                      children: [
+                        const Text(
+                          "SHOP PRO",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w100,
+                            letterSpacing: 12, 
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          height: 1,
+                          width: 40,
+                          color: Colors.white24,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
