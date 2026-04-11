@@ -649,7 +649,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final theme = Theme.of(context);
+    Theme.of(context);
     final hasProducts = products.isNotEmpty;
 
     return Scaffold(
@@ -759,7 +759,6 @@ class _HomeScreenState extends State<HomeScreen>
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
-                                // 1. IMAGE WITH WHITE BACKGROUND
                                 Container(
                                   color: Colors.white,
                                   child: Hero(
@@ -767,11 +766,10 @@ class _HomeScreenState extends State<HomeScreen>
                                     child: Padding(
                                       padding: const EdgeInsets.only(
                                         bottom: 40.0,
-                                      ), // Room for text
+                                      ),
                                       child: Image.network(
                                         product.image,
-                                        fit: BoxFit
-                                            .contain, // Best for electronics
+                                        fit: BoxFit.contain,
                                         errorBuilder:
                                             (context, error, stackTrace) =>
                                                 Container(
@@ -785,7 +783,6 @@ class _HomeScreenState extends State<HomeScreen>
                                     ),
                                   ),
                                 ),
-                                // 2. PREMIUM DARK GRADIENT OVERLAY
                                 Container(
                                   decoration: const BoxDecoration(
                                     gradient: LinearGradient(
@@ -799,7 +796,6 @@ class _HomeScreenState extends State<HomeScreen>
                                     ),
                                   ),
                                 ),
-                                // 3. AGENCY BADGE (TOP LEFT)
                                 Positioned(
                                   top: 20,
                                   left: 20,
@@ -848,7 +844,7 @@ class _HomeScreenState extends State<HomeScreen>
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                           color: Colors.white,
-                                          fontSize: 22,
+                                          fontSize: 15,
                                           fontWeight: FontWeight.w900,
                                           letterSpacing: -0.5,
                                         ),
@@ -869,14 +865,6 @@ class _HomeScreenState extends State<HomeScreen>
                                                       .withOpacity(0.7),
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                              Text(
-                                                '\$${product.price}',
-                                                style: const TextStyle(
-                                                  color: Colors.deepOrange,
-                                                  fontSize: 24,
-                                                  fontWeight: FontWeight.w900,
                                                 ),
                                               ),
                                             ],
@@ -911,8 +899,8 @@ class _HomeScreenState extends State<HomeScreen>
                                               );
                                             },
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.white,
-                                              foregroundColor: Colors.black,
+                                              backgroundColor:
+                                                  Colors.deepOrangeAccent,
                                               elevation: 0,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
@@ -927,12 +915,14 @@ class _HomeScreenState extends State<HomeScreen>
                                             icon: const Icon(
                                               Icons.shopping_bag_outlined,
                                               size: 18,
+                                              color: Colors.white,
                                             ),
                                             label: const Text(
                                               'Buy Now',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 14,
+                                                color: Colors.white,
                                               ),
                                             ),
                                           ),
