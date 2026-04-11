@@ -1,45 +1,66 @@
-import 'package:ecommerce_app/Screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'onboarding_screen.dart';
 
 class FlashScreen extends StatefulWidget {
   const FlashScreen({super.key});
 
   @override
-  State<FlashScreen> createState() => _FlashScreenState();
+  _FlashScreenState createState() => _FlashScreenState();
 }
 
 class _FlashScreenState extends State<FlashScreen>
-    with TickerProviderStateMixin {
-  double _logoOffset = -200;
-  double _textOffset = 200;
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _logoAnimation;
+  late Animation<Offset> _textAnimation;
+
   double _opacity = 1.0;
   double _scale = 1.0;
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
 
-    Timer(Duration(milliseconds: 500), () {
-      setState(() {
-        _logoOffset = 0;
-        _textOffset = 0;
-      });
+    _logoAnimation = Tween<Offset>(
+      begin: const Offset(-1.5, 0.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
+
+    _textAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 3.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+
+    _controller.forward();
+
+    Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _opacity = 0.0;
+          _scale = 3.0;
+        });
+      }
     });
 
-    Timer(Duration(seconds: 3), () {
-      setState(() {
-        _opacity = 0.0;
-        _scale = 1.5;
-      });
+    Timer(const Duration(seconds: 4), () {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => OnboardingScreen()),
+        );
+      }
     });
+  }
 
-    Timer(Duration(seconds: 4), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => OnboardingScreen()),
-      );
-    });
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -47,36 +68,32 @@ class _FlashScreenState extends State<FlashScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: AnimatedScale(
-          scale: _scale,
-          duration: Duration(milliseconds: 800),
-          child: AnimatedOpacity(
-            opacity: _opacity,
-            duration: Duration(milliseconds: 800),
+        child: AnimatedOpacity(
+          opacity: _opacity,
+          duration: const Duration(milliseconds: 800),
+          child: AnimatedScale(
+            scale: _scale,
+            duration: const Duration(milliseconds: 900),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                AnimatedContainer(
-                  duration: Duration(milliseconds: 1000),
-                  curve: Curves.elasticOut,
-                  transform: Matrix4.translationValues(_logoOffset, 0, 0),
-                  child: Icon(
-                    Icons.shopping_bag_outlined,
+                SlideTransition(
+                  position: _logoAnimation,
+                  child: const Icon(
+                    Icons.shopping_bag,
                     size: 100,
                     color: Colors.blueAccent,
                   ),
                 ),
-                SizedBox(height: 20),
-                AnimatedContainer(
-                  duration: Duration(milliseconds: 1000),
-                  curve: Curves.easeOutCubic,
-                  transform: Matrix4.translationValues(0, _textOffset, 0),
-                  child: Text(
+                const SizedBox(height: 20),
+                SlideTransition(
+                  position: _textAnimation,
+                  child: const Text(
                     "SHOP PRO",
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 30,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
+                      letterSpacing: 5,
                     ),
                   ),
                 ),
