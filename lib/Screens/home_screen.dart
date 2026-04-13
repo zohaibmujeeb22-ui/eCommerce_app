@@ -412,7 +412,22 @@ class BannerProduct {
     required this.category,
   });
 
-  String operator [](String other) {}
+  String operator [](String other) {
+    switch (other) {
+      case 'title':
+        return title;
+      case 'description':
+        return description;
+      case 'assetPath':
+        return assetPath;
+      case 'price':
+        return price.toString();
+      case 'category':
+        return category;
+      default:
+        throw ArgumentError('Invalid key: $other');
+    }
+  }
 }
 
 class HomeScreen extends StatefulWidget {
