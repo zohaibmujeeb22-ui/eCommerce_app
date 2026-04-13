@@ -812,17 +812,49 @@ class _HomeScreenState extends State<HomeScreen>
                       final product = bannerProducts[index];
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF5F5F5),
-                                  borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(
+                              25,
+                            ), // Circle corners
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(
+                                  0.2,
+                                ), // Soft premium shadow
+                                blurRadius: 15,
+                                spreadRadius: 2,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              25,
+                            ), // Match container corners
+                            child: Stack(
+                              children: [
+                                // The Image covering the full 220 area
+                                Image.asset(
+                                  product['image'],
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  fit: BoxFit.cover,
                                 ),
-                                child: Stack(
+                                // Dark overlay at the bottom for text readability
+                                Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.black.withOpacity(0.7),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Stack(
                                   children: [
                                     const Positioned(
                                       left: 15,
@@ -869,57 +901,59 @@ class _HomeScreenState extends State<HomeScreen>
                                     ),
                                   ],
                                 ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 12),
-                            Text(
-                              product['title'],
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              product['description'],
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 13,
-                              ),
-                            ),
-
-                            const SizedBox(height: 10),
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
+                                const SizedBox(height: 12),
                                 Text(
-                                  "\$${product['price']}",
+                                  product['title'],
                                   style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w900,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    print("Go to ${product['category']}");
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                      vertical: 12,
-                                    ),
+                                Text(
+                                  product['description'],
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 13,
                                   ),
-                                  child: const Text("BUY NOW"),
+                                ),
+
+                                const SizedBox(height: 10),
+
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "\$${product['price']}",
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        print("Go to ${product['category']}");
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.black,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 24,
+                                          vertical: 12,
+                                        ),
+                                      ),
+                                      child: const Text("BUY NOW"),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
+                          ),
                         ),
                       );
                     },
