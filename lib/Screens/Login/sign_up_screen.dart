@@ -1,3 +1,4 @@
+import 'package:ecommerce_app/Screens/main_screen.dart';
 import 'package:ecommerce_app/services/auth_controller.dart';
 import 'package:ecommerce_app/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -49,7 +50,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       await userCredential.user?.updateDisplayName(
         _usernameController.text.trim(),
       );
-      // AuthWrapper switches to MainScreen when the new session is active.
+
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+          (route) => false,
+        );
+      }
     } on FirebaseAuthException catch (e) {
       String errorMessage = "Registration failed";
       if (e.code == 'weak-password') {
@@ -199,9 +207,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       onPressed: () async {
                         setState(() => _isGoogleLoading = true);
                         try {
-                          // Skip silent Google restore so signup always shows the
-                          // account chooser; onBeforeFirebase sets profile-setup
-                          // before authState fires so AuthWrapper does not jump to MainScreen.
                           final UserCredential? result = await AuthService()
                               .signInWithGoogle(
                                 skipLightweightAuthentication: true,
@@ -223,7 +228,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             return;
                           }
 
-                          // Strict: only isNewUser == false means "already registered".
                           if (result.additionalUserInfo != null &&
                               result.additionalUserInfo!.isNewUser == false) {
                             if (context.mounted) {

@@ -707,17 +707,17 @@ class _HomeScreenState extends State<HomeScreen>
         description: "Titanium. So strong. So light.",
         assetPath: 'assets/images/iphone.jpg',
         price: 999,
+        category: "Smartphones",
         image: 'assets/images/iphone.jpg',
-        category: "Phones",
       ),
       BannerProduct(
         id: 3,
         title: "AirPods Max",
         description: "High-fidelity audio experience",
-        assetPath: 'assets/images/airpods.jpg',
+        assetPath: 'assets/images/lipstik.jpg',
         price: 549,
-        image: 'assets/images/airpods.jpg',
-        category: "Audio",
+        category: "Beauty",
+        image: 'assets/images/lipstik.jpg',
       ),
     ];
 
@@ -811,17 +811,16 @@ class _HomeScreenState extends State<HomeScreen>
                     itemBuilder: (context, index) {
                       final product = bannerProducts[index];
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(
-                              25,
-                            ), // Circle corners
+                            borderRadius: BorderRadius.circular(25),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(
-                                  0.2,
-                                ), // Soft premium shadow
+                                color: Colors.black.withOpacity(0.3),
                                 blurRadius: 15,
                                 spreadRadius: 2,
                                 offset: const Offset(0, 8),
@@ -829,127 +828,140 @@ class _HomeScreenState extends State<HomeScreen>
                             ],
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              25,
-                            ), // Match container corners
+                            borderRadius: BorderRadius.circular(25),
                             child: Stack(
                               children: [
-                                // The Image covering the full 220 area
                                 Image.asset(
                                   product['image'],
                                   width: double.infinity,
                                   height: double.infinity,
                                   fit: BoxFit.cover,
                                 ),
-                                // Dark overlay at the bottom for text readability
                                 Container(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
                                       colors: [
-                                        Colors.transparent,
-                                        Colors.black.withOpacity(0.7),
+                                        Colors.black.withOpacity(0.1),
+                                        Colors.black.withOpacity(0.8),
                                       ],
                                     ),
                                   ),
                                 ),
-                                Stack(
-                                  children: [
-                                    const Positioned(
-                                      left: 15,
-                                      top: 40,
-                                      child: Text(
-                                        "DROP",
-                                        style: TextStyle(
-                                          fontSize: 60,
-                                          fontWeight: FontWeight.w900,
+                                const Positioned(
+                                  left: 15,
+                                  top: 30,
+                                  child: Text(
+                                    "DROP",
+                                    style: TextStyle(
+                                      fontSize: 70,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white12,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 15,
+                                  left: 15,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 5,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: const Text(
+                                      "PREMIUM TECH",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 15,
+                                  left: 15,
+                                  right: 15,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        product['title'],
+                                        style: const TextStyle(
                                           color: Colors.white,
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                          shadows: [
+                                            Shadow(
+                                              blurRadius: 10,
+                                              color: Colors.black,
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ),
-
-                                    Positioned.fill(
-                                      child: Image.asset(
-                                        product['image'],
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 15,
-                                      left: 15,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
+                                      Text(
+                                        product['description'],
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.8),
+                                          fontSize: 13,
+                                          shadows: [
+                                            Shadow(
+                                              blurRadius: 5,
+                                              color: Colors.black,
+                                            ),
+                                          ],
                                         ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black,
-                                          borderRadius: BorderRadius.circular(
-                                            5,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "\$${product['price']}",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.w900,
+                                            ),
                                           ),
-                                        ),
-                                        child: const Text(
-                                          "PREMIUM TECH",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 8,
-                                            fontWeight: FontWeight.bold,
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              _navigateToCategory(
+                                                product['category'],
+                                              );
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.white,
+                                              foregroundColor: Colors.black,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 20,
+                                                    vertical: 10,
+                                                  ),
+                                            ),
+                                            child: const Text(
+                                              "BUY NOW",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
                                           ),
-                                        ),
+                                        ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  product['title'],
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                                    ],
                                   ),
-                                ),
-                                Text(
-                                  product['description'],
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 13,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 10),
-
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "\$${product['price']}",
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        print("Go to ${product['category']}");
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.black,
-                                        foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 24,
-                                          vertical: 12,
-                                        ),
-                                      ),
-                                      child: const Text("BUY NOW"),
-                                    ),
-                                  ],
                                 ),
                               ],
                             ),
