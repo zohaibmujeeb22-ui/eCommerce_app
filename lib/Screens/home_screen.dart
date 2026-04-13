@@ -423,6 +423,8 @@ class BannerProduct {
         return description;
       case 'assetPath':
         return assetPath;
+      case 'image':
+        return image;
       case 'price':
         return price.toString();
       case 'category':
@@ -813,7 +815,6 @@ class _HomeScreenState extends State<HomeScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // 1. Image Container
                             Expanded(
                               child: Container(
                                 width: double.infinity,
@@ -835,10 +836,11 @@ class _HomeScreenState extends State<HomeScreen>
                                         ),
                                       ),
                                     ),
-                                    Center(
+
+                                    Positioned.fill(
                                       child: Image.asset(
                                         product['image'],
-                                        fit: BoxFit.contain,
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
                                     Positioned(
