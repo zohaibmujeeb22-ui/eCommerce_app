@@ -395,6 +395,7 @@ class ProductSearchDelegate extends SearchDelegate<String> {
     }
   }
 }
+
 class BannerProduct {
   final int id;
   final String title;
@@ -402,6 +403,7 @@ class BannerProduct {
   final String assetPath;
   final double price;
   final String category;
+  final String image;
 
   BannerProduct({
     required this.id,
@@ -410,6 +412,7 @@ class BannerProduct {
     required this.assetPath,
     required this.price,
     required this.category,
+    required this.image,
   });
 
   String operator [](String other) {
@@ -687,31 +690,34 @@ class _HomeScreenState extends State<HomeScreen>
     final hasProducts = products.isNotEmpty;
 
     final List<BannerProduct> bannerProducts = [
-  BannerProduct(
-    id: 1,
-    title: "MacBook Pro 16",
-    description: "Next-level computing power",
-    assetPath: 'assets/images/macbook.png',
-    price: 2499,
-    category: "Laptops",
-  ),
-  BannerProduct(
-    id: 2,
-    title: "iPhone 15 Pro",
-    description: "Titanium. So strong. So light.",
-    assetPath: 'assets/images/iphone.png',
-    price: 999,
-    category: "Phones",
-  ),
-  BannerProduct(
-    id: 3,
-    title: "AirPods Max",
-    description: "High-fidelity audio experience",
-    assetPath: 'assets/images/airpods.png',
-    price: 549,
-    category: "Audio",
-  ),
-];
+      BannerProduct(
+        id: 1,
+        title: "MacBook Pro 16",
+        description: "Next-level computing power",
+        assetPath: 'assets/images/laptop.jpg',
+        price: 2499,
+        category: 'Laptops',
+        image: 'assets/images/laptop.jpg',
+      ),
+      BannerProduct(
+        id: 2,
+        title: "iPhone 15 Pro",
+        description: "Titanium. So strong. So light.",
+        assetPath: 'assets/images/iphone.jpg',
+        price: 999,
+        image: 'assets/images/iphone.jpg',
+        category: "Phones",
+      ),
+      BannerProduct(
+        id: 3,
+        title: "AirPods Max",
+        description: "High-fidelity audio experience",
+        assetPath: 'assets/images/airpods.jpg',
+        price: 549,
+        image: 'assets/images/airpods.jpg',
+        category: "Audio",
+      ),
+    ];
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -797,89 +803,125 @@ class _HomeScreenState extends State<HomeScreen>
                 child: SizedBox(
                   height: 220,
                   child: PageView.builder(
-    controller: _pageController,
-    itemCount: bannerProducts.length,
-    onPageChanged: (i) => setState(() => currentPage = i),
-    itemBuilder: (context, index) {
-      final product = bannerProducts[index];
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Image Container
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Stack(
-                  children: [
-                    const Positioned(
-                      left: 15,
-                      top: 40,
-                      child: Text("DROP", style: TextStyle(fontSize: 60, fontWeight: FontWeight.w900, color: Colors.white)),
-                    ),
-                    Center(
-                      child: Image.asset(
-                        product['image'],
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    Positioned(
-                      top: 15,
-                      left: 15,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(5)),
-                        child: const Text("PREMIUM TECH", style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                    controller: _pageController,
+                    itemCount: bannerProducts.length,
+                    onPageChanged: (i) => setState(() => currentPage = i),
+                    itemBuilder: (context, index) {
+                      final product = bannerProducts[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 1. Image Container
+                            Expanded(
+                              child: Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF5F5F5),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    const Positioned(
+                                      left: 15,
+                                      top: 40,
+                                      child: Text(
+                                        "DROP",
+                                        style: TextStyle(
+                                          fontSize: 60,
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    Center(
+                                      child: Image.asset(
+                                        product['image'],
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 15,
+                                      left: 15,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black,
+                                          borderRadius: BorderRadius.circular(
+                                            5,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          "PREMIUM TECH",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 8,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
 
-            const SizedBox(height: 12),
-            Text(
-              product['title'],
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              product['description'],
-              style: const TextStyle(color: Colors.grey, fontSize: 13),
-            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              product['title'],
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              product['description'],
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 13,
+                              ),
+                            ),
 
-            const SizedBox(height: 10),
+                            const SizedBox(height: 10),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "\$${product['price']}",
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    print("Go to ${product['category']}");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "\$${product['price']}",
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    print("Go to ${product['category']}");
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.black,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                  child: const Text("BUY NOW"),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                  child: const Text("BUY NOW"),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    },
-  ),
                 ),
               ),
             if (bannerProducts.isNotEmpty)
