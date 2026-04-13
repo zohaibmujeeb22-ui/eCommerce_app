@@ -395,6 +395,25 @@ class ProductSearchDelegate extends SearchDelegate<String> {
     }
   }
 }
+class BannerProduct {
+  final int id;
+  final String title;
+  final String description;
+  final String assetPath;
+  final double price;
+  final String category;
+
+  BannerProduct({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.assetPath,
+    required this.price,
+    required this.category,
+  });
+
+  String operator [](String other) {}
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -652,6 +671,33 @@ class _HomeScreenState extends State<HomeScreen>
     Theme.of(context);
     final hasProducts = products.isNotEmpty;
 
+    final List<BannerProduct> bannerProducts = [
+  BannerProduct(
+    id: 1,
+    title: "MacBook Pro 16",
+    description: "Next-level computing power",
+    assetPath: 'assets/images/macbook.png',
+    price: 2499,
+    category: "Laptops",
+  ),
+  BannerProduct(
+    id: 2,
+    title: "iPhone 15 Pro",
+    description: "Titanium. So strong. So light.",
+    assetPath: 'assets/images/iphone.png',
+    price: 999,
+    category: "Phones",
+  ),
+  BannerProduct(
+    id: 3,
+    title: "AirPods Max",
+    description: "High-fidelity audio experience",
+    assetPath: 'assets/images/airpods.png',
+    price: 549,
+    category: "Audio",
+  ),
+];
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: RefreshIndicator(
@@ -736,208 +782,89 @@ class _HomeScreenState extends State<HomeScreen>
                 child: SizedBox(
                   height: 220,
                   child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: bannerProducts.length,
-                    onPageChanged: (i) => setState(() => currentPage = i),
-                    itemBuilder: (context, index) {
-                      final product = bannerProducts[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.12),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(30),
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Container(
-                                  color: Colors.white,
-                                  child: Hero(
-                                    tag: 'banner_${product.id}',
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 40.0,
-                                      ),
-                                      child: Image.network(
-                                        product.image,
-                                        fit: BoxFit.contain,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                Container(
-                                                  color: Colors.grey[100],
-                                                  child: const Icon(
-                                                    Icons.image_not_supported,
-                                                    color: Colors.grey,
-                                                  ),
-                                                ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.bottomCenter,
-                                      end: Alignment.topCenter,
-                                      stops: [0.0, 0.6],
-                                      colors: [
-                                        Color.fromRGBO(0, 0, 0, 0.85),
-                                        Colors.transparent,
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 20,
-                                  left: 20,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black87,
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(color: Colors.white24),
-                                    ),
-                                    child: const Row(
-                                      children: [
-                                        Icon(
-                                          Icons.bolt,
-                                          color: Colors.deepOrange,
-                                          size: 16,
-                                        ),
-                                        SizedBox(width: 4),
-                                        Text(
-                                          "PREMIUM TECH",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                            letterSpacing: 1.2,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  left: 20,
-                                  bottom: 20,
-                                  right: 20,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        product.title,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: -0.5,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Exclusive Drop',
-                                                style: TextStyle(
-                                                  color: Colors.white
-                                                      .withOpacity(0.7),
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          ElevatedButton.icon(
-                                            onPressed: () {
-                                              context
-                                                  .read<AppState>()
-                                                  .addToCart(product, 1);
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    '${product.title.length > 20 ? "${product.title.substring(0, 20)}..." : product.title} added to cart',
-                                                  ),
-                                                  backgroundColor: const Color(
-                                                    0xFF1A1A1A,
-                                                  ),
-                                                  behavior:
-                                                      SnackBarBehavior.floating,
-                                                ),
-                                              );
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      ProductDetailScreen(
-                                                        product: product,
-                                                      ),
-                                                ),
-                                              );
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.deepOrangeAccent,
-                                              elevation: 0,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                              ),
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 16,
-                                                    vertical: 12,
-                                                  ),
-                                            ),
-                                            icon: const Icon(
-                                              Icons.shopping_bag_outlined,
-                                              size: 18,
-                                              color: Colors.white,
-                                            ),
-                                            label: const Text(
-                                              'Buy Now',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+    controller: _pageController,
+    itemCount: bannerProducts.length,
+    onPageChanged: (i) => setState(() => currentPage = i),
+    itemBuilder: (context, index) {
+      final product = bannerProducts[index];
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Image Container
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Stack(
+                  children: [
+                    const Positioned(
+                      left: 15,
+                      top: 40,
+                      child: Text("DROP", style: TextStyle(fontSize: 60, fontWeight: FontWeight.w900, color: Colors.white)),
+                    ),
+                    Center(
+                      child: Image.asset(
+                        product['image'],
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    Positioned(
+                      top: 15,
+                      left: 15,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(5)),
+                        child: const Text("PREMIUM TECH", style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+            Text(
+              product['title'],
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              product['description'],
+              style: const TextStyle(color: Colors.grey, fontSize: 13),
+            ),
+
+            const SizedBox(height: 10),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "\$${product['price']}",
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    print("Go to ${product['category']}");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
+                  child: const Text("BUY NOW"),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    },
+  ),
                 ),
               ),
             if (bannerProducts.isNotEmpty)
